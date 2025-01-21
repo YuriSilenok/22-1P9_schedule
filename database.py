@@ -1,4 +1,4 @@
-from peewee import SqliteDatabase, Model, AutoField, CharField
+from peewee import SqliteDatabase, Model, CharField, ForeignKeyField, DateTimeField
 
 # Настройка базы данных
 DATABASE_URL = "./schedule.db"  # Путь к файлу базы данных
@@ -9,15 +9,34 @@ class BaseModel(Model):
     class Meta:
         database = db
 
+# Модель преподавателей
+class Teacher(BaseModel):
+    name = CharField()  # Имя преподавателя
+    department = CharField()  # Отдел
+
+# Модель предметов
+class Subject(BaseModel):
+    name = CharField()  # Название предмета
+    teacher = ForeignKeyField(Teacher, backref='subjects')  # Связь с преподавателем
+
+# Модель групп
+class Group(BaseModel):
+    group_name = CharField()  # Название группы
+
+# Модель аудиторий
+class Classroom(BaseModel):
+    room_number = CharField()  # Номер аудитории
+
 # Модель расписания
 class Schedule(BaseModel):
-    id = AutoField()  # Автоматическое создание уникального идентификатора
     day = CharField()  # Поле для хранения дня недели
-    subject = CharField()  # Поле для хранения названия предмета
-    timeslot = CharField()  # Поле для хранения временного интервала
+    subject = ForeignKeyField(Subject, backref='schedules')  # Связь с предметом
+    group = ForeignKeyField(Group, backref='schedules')  # Связь с группой
+    classroom = ForeignKeyField(Classroom, backref='schedules')  # Связь с аудиторией
+    time = DateTimeField()  # Поле для хранения времени занятия
 
 # Функция для инициализации базы данных
 def initialize_database():
     if db.is_closed():  # Проверяем, если база данных не подключена
         db.connect()
-    db.create_tables([Schedule], safe=True)  # safe=True, чтобы избежать ошибок, если таблицы уже существуют
+    db.create_tables([Teacher, Subject, Group, Classroom, Schedule], safe=True)  # Создаем все таблицы
