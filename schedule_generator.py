@@ -26,6 +26,14 @@ class SubjectCreateRequest(BaseModel):
     name: str
     teacher_id: int  # ID преподавателя
 
+class SubjectResponse(BaseModel):
+    id: int
+    name: str
+    teacher_id: int
+
+    class Config:
+        orm_mode = True  # Для работы с объектами Peewee
+
 class TimeslotCreateRequest(BaseModel):
     timeslot: str
 
@@ -35,14 +43,14 @@ class DayCreateRequest(BaseModel):
 # Маршруты API
 
 # Эндпоинт для создания предмета
-@app.post("/create_subject/", response_model=Subject)
+@app.post("/create_subject/", response_model=SubjectResponse)
 def create_subject(request: SubjectCreateRequest):
     """Создание нового предмета."""
     teacher = Teacher.get_or_none(Teacher.id == request.teacher_id)
     if not teacher:
         raise HTTPException(status_code=404, detail="Преподаватель не найден.")
     subject = Subject.create(name=request.name, teacher=teacher)
-    return subject
+    return SubjectResponse.from_orm(subject)
 
 # Эндпоинт для добавления временного интервала
 @app.post("/create_timeslot/", response_model=TimeslotCreateRequest)
