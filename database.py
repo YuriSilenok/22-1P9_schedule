@@ -1,42 +1,46 @@
 from peewee import SqliteDatabase, Model, CharField, ForeignKeyField, DateTimeField
 
 # Настройка базы данных
-DATABASE_URL = "./schedule.db"  # Путь к файлу базы данных
+DATABASE_URL = "./schedule.db"
 db = SqliteDatabase(DATABASE_URL)
 
-# Определение базовой модели для работы с базой данных
 class BaseModel(Model):
     class Meta:
         database = db
 
+# Модель пользователей
+class User(BaseModel):
+    username = CharField(unique=True)
+    hashed_password = CharField()
+
 # Модель преподавателей
 class Teacher(BaseModel):
-    name = CharField()  # Имя преподавателя
-    department = CharField()  # Отдел
+    name = CharField()
+    department = CharField()
 
 # Модель предметов
 class Subject(BaseModel):
-    name = CharField()  # Название предмета
-    teacher = ForeignKeyField(Teacher, backref='subjects')  # Связь с преподавателем
+    name = CharField()
+    teacher = ForeignKeyField(Teacher, backref='subjects')
 
 # Модель групп
 class Group(BaseModel):
-    group_name = CharField()  # Название группы
+    group_name = CharField()
 
 # Модель аудиторий
 class Classroom(BaseModel):
-    room_number = CharField()  # Номер аудитории
+    room_number = CharField()
 
 # Модель расписания
 class Schedule(BaseModel):
-    day = CharField()  # Поле для хранения дня недели
-    subject = ForeignKeyField(Subject, backref='schedules')  # Связь с предметом
-    group = ForeignKeyField(Group, backref='schedules')  # Связь с группой
-    classroom = ForeignKeyField(Classroom, backref='schedules')  # Связь с аудиторией
-    time = DateTimeField()  # Поле для хранения времени занятия
+    day = CharField()
+    subject = ForeignKeyField(Subject, backref='schedules')
+    group = ForeignKeyField(Group, backref='schedules')
+    classroom = ForeignKeyField(Classroom, backref='schedules')
+    time = DateTimeField()
 
-# Функция для инициализации базы данных
+# Функция инициализации базы данных
 def initialize_database():
-    if db.is_closed():  # Проверяем, если база данных не подключена
+    if db.is_closed():
         db.connect()
-    db.create_tables([Teacher, Subject, Group, Classroom, Schedule], safe=True)  # Создаем все таблицы
+    db.create_tables([User, Teacher, Subject, Group, Classroom, Schedule], safe=True)
