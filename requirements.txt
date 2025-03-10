@@ -1,3 +1,7 @@
 peewee
 fastapi
 uvicorn
+PyJWT
+passlib
+python-multipart
+bcrypt
